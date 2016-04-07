@@ -1,33 +1,14 @@
 {
-  "plugins": [
-    "react"
-  ],
+  "plugins": [],
   "env": {
     "browser" : true,
     "node"    : true,
     "es6"     : true,
     "mocha"   : true,
-    "jasmine" : true,
-    "jest"    : true
   },
-  "globals": {
-    "jest"               : true,
-    "stubRouterContext"  : true,
-    "wrapIntlProvider"   : true,
-    "Simulate"           : true,
-    "renderIntoDocument" : true,
-    "findDOMNode"        : true,
-    "findWithTag"        : true,
-    "findWithClass"      : true,
-    "scryWithTag"        : true,
-    "scryWithClass"      : true,
-    "Modernizr"          : true,
-    "mockStore"          : true
-  },
+  "globals": {},
   "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    }
+    "sourceType": "module"
   },
   "rules": {
     "array-bracket-spacing" : [2, "never", { "singleValue": true }],
@@ -35,7 +16,6 @@
     "comma-style"           : [2, "last"],
     "dot-notation"          : 2, "curly": [ 2, "all" ],
     "eol-last"              : 2,
-    "jsx-quotes"            : 2,
     "keyword-spacing": [ 2,
       {
         "overrides": {
@@ -70,8 +50,6 @@
     "no-use-before-define"       : 2,
     "no-with"                    : 2,
     "one-var"                    : [2, "never"],
-    "react/jsx-no-undef"         : 2,
-    "react/jsx-uses-vars"        : 2,
     "semi"                       : [2, "always"],
     "space-before-blocks"        : [2, "always"],
     "space-in-parens"            : [2, "never"],
