@@ -1,37 +1,42 @@
-'use strict';
-
-const io = require('socket.io-client');
-const ss = require('socket.io-stream');
+import io from 'socket.io-client';
+import ss from 'socket.io-stream';
+import effect from './effect';
+import { Bus, update } from 'baconjs';
+import h from 'virtual-dom/h';
 
 const socket = io.connect(location.href);
 
-// What next?
-// Lets get
-// virtual-dom
-// baconjs
-//
-// -------------------------------------------------
-// On connection, receive the config.
-// For each command show the name and a button.
-// When the button is clicked, invoke the associated process
-// and show the output.
-// - Consider reconnection!
-// - Consider closing processes!
-// --------------------------------------------------
+const dataStream = new Bus();
 
 ss(socket).on('p', stream => {
 
   stream.on('data', d => {
-
-    console.log('d', d.toString());
-
+    dataStream.push(d.toString());
   });
 
   stream.on('end', () => {
-
-    console.log('Ended');
-
+    dataStream.end();
   });
 
 });
 
+const initialState = { number : 0 };
+
+const onNumber = (state, n) => {
+  state.number = n;
+  return state;
+};
+
+const stateStream = update(initialState,
+  [ dataStream ], onNumber
+);
+
+const stateToVDOM = state => {
+  return h('section', { className : 'x' }, state.number);
+};
+
+const stateStreamToVDOM = stateStream.map(stateToVDOM);
+
+const rootNode = document.querySelector('#root');
+
+effect(rootNode, stateStreamToVDOM).onValue();
