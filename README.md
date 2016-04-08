@@ -13,11 +13,6 @@
 [ ] Config: Can turn on / off notifications
 
 ```
-// What next?
-// Lets get
-// virtual-dom
-// baconjs
-//
 // -------------------------------------------------
 // On connection, receive the config.
 // For each command show the name and a button.
@@ -26,23 +21,4 @@
 // - Consider reconnection!
 // - Consider closing processes!
 // --------------------------------------------------
-```
-
-```
-{
-  commands : {
-    fire : {
-      name    : 'Fire missiles',
-      command : './fire.sh',
-      onEnd   : 'notify',
-      onRegex : [
-        {
-          exp     : /launch/,
-          command : './peace.sh',
-          onEnd   : 'notify'
-        }
-      ]
-    },
-  }
-}
 ```

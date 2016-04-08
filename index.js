@@ -12,15 +12,34 @@ const ONEYEAR  = 31557600000;
 
 app.use(express.static('static', { maxAge : ONEYEAR }));
 
+const config = {
+  commands : {
+    fire : {
+      name    : 'Start counter',
+      command : './counter.sh',
+      onEnd   : 'notify'
+      //onRegex : [
+        //{
+          //exp     : /launch/,
+          //command : './peace.sh',
+          //onEnd   : 'notify'
+        //}
+      //]
+    }
+  }
+};
+
 io.on('connection', socket => {
 
-  const spawn   = require('child_process').spawn;
-  const counter = spawn('./counter.sh'); // so redundant wat
-  const stream  = ss.createStream();
+  socket.emit('config', config);
 
-  ss(socket).emit('p', stream);
+  //const spawn   = require('child_process').spawn;
+  //const counter = spawn('./counter.sh'); // so redundant wat
+  //const stream  = ss.createStream();
 
-  counter.stdout.pipe(stream);
+  //ss(socket).emit('p', stream);
+
+  //counter.stdout.pipe(stream);
 
 });
 

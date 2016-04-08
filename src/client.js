@@ -1,12 +1,16 @@
-import io from 'socket.io-client';
+import socket from './io';
 import ss from 'socket.io-stream';
 import effect from './effect';
 import { Bus, update } from 'baconjs';
 import h from 'virtual-dom/h';
 
-const socket = io.connect(location.href);
-
 const dataStream = new Bus();
+
+import configStream from './streams/config';
+
+configStream.onValue(v => {
+  console.log(v);
+});
 
 ss(socket).on('p', stream => {
 
