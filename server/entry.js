@@ -25,6 +25,11 @@ socketStream.onValue(socket => {
   console.log('connected');
 
   socket.emit('config', config);
+  socket.on('action', action => {
+
+    console.log(action);
+
+  });
 
   //const spawn   = require('child_process').spawn;
   //const counter = spawn('./counter.sh'); // so redundant wat
