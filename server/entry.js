@@ -1,50 +1,56 @@
-import ss                 from 'socket.io-stream';
-import { flip, prop }     from 'ramda';
-import { spawn }          from 'child_process';
-import path from 'path';
+import ss             from 'socket.io-stream';
+import { spawn }      from 'child_process';
+import path           from 'path';
 
-import server             from './server';
+import server from './server';
 
-import clientActionStream from './streams/clientAction';
-import socketProp         from './properties/socket';
-import configProp         from './properties/configProp';
+import socketProp   from './properties/socket';
+import configProp   from './properties/config';
 
+import {
+  startActionStream,
+  stopActionStream
+} from './streams/action';
+
+// Share config with client ---------------------------------------------------
 const emitConfig = (config, socket) => socket.emit('config', config);
-
 configProp.sampledBy(socketProp, emitConfig).onValue();
 
-const startClickedPredicate = ({ action }) => action === 'START_CLICKED';
+// Handle actions from the client ---------------------------------------------
 
-const startClickedStream = clientActionStream
-  .filter(startClickedPredicate)
-  .map('.id');
+// :: Object command -> Process
+const startProcess = ({ command, id }) => {
+  return { id, proc : spawn(path.join(__dirname, '..', command)) };
+};
 
-const commandsProp = configProp.map('.commands');
-
-const commandStream = commandsProp.sampledBy(startClickedStream, flip(prop));
-
-socketProp.sampledBy(commandStream, (socket, { command, name }) => {
-
-  const commpath = path.join(__dirname, '..', command);
-  console.log(`Starting command: ${name}, ${commpath}`);
-
-  const counter = spawn(commpath);
-  const stream  = ss.createStream();
-
-  counter.on('error', err => { console.log(err); });
-  counter.on('exit', () => { console.log('exit'); });
-  counter.on('close', () => { console.log('close'); });
-
-  counter.stdout.on('data', d => {
-    console.log('d',d);
+// :: Object process, Object action
+const stopProcess = ({ id, proc }, action) => {
+  // TODO make this work.
+  console.log('stopping process', id, action);
+  proc.on('exit', () => {
+    console.log('exit', proc.pid);
   });
+  proc.kill();
+};
 
-  ss(socket).emit('p', stream);
+// :: Property
+const processProp = startActionStream.map(startProcess).toProperty();
 
-  counter.stdout.pipe(stream);
+// :: Object socket, Object process -> undefined
+const pipeStdOut = (socket, { id, proc }) => {
 
-}).onValue();
+  console.log(id);
 
+  const stream  = ss.createStream();
+  ss(socket).emit(id, stream);
+  proc.stdout.pipe(stream);
+
+};
+
+processProp.sampledBy(stopActionStream, stopProcess).onValue();
+
+socketProp.sampledBy(processProp, pipeStdOut).onValue();
+
+// Start server ---------------------------------------------------------------
 server.listen(3000);
-
-console.info('Truck server running on 3000');
+console.info('Truck server running on http://localhost:3000');

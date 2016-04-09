@@ -1,47 +1,28 @@
-import { Bus, update } from 'baconjs';
-import { toPairs }     from 'ramda';
-import ss              from 'socket.io-stream';
+import { update } from 'baconjs';
+import { compose, view, set, flip, lensProp, toPairs } from 'ramda';
 
-import socket       from '../io';
 import configStream from './config';
+import processStream from './process';
 
-const dataStream = new Bus();
+const commandLens  = lensProp('commands');
+const numberLens   = lensProp('number');
 
-ss(socket).on('p', stream => {
-
-  console.log('p', stream);
-
-  stream.on('data', d => {
-    console.log('d', d);
-    dataStream.push(d.toString());
-  });
-
-  stream.on('end', () => {
-    dataStream.end();
-  });
-
-});
-
+const extractPairs = compose(toPairs, view(commandLens));
 
 const initialState = {
   number   : 0,
   commands : []
 };
 
-const onConfig = (state, config) => {
-  state.commands = toPairs(config.commands);
-  return state;
+const onConfig = (config, state) => {
+  return set(commandLens, extractPairs(config), state);
 };
 
-const onNumber = (state, n) => {
-  console.log(n);
-  state.number = n;
-  return state;
-};
+const onNumber = set(numberLens);
 
 const stateStream = update(initialState,
-  [ configStream ], onConfig,
-  [ dataStream ], onNumber
+  [ configStream ], flip(onConfig),
+  [ processStream ], flip(onNumber)
 );
 
 export default stateStream;
