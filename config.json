@@ -1,0 +1,17 @@
+{
+  "commands" : {
+    "fire": {
+      "name"    : "Start counter",
+      "command" : "./scripts/counter.sh",
+      "onEnd"   : "notify",
+      "onRegex" : [
+        {
+          "exp"     : "/9/",
+          "command" : "./scripts/peace.sh",
+          "onEnd"   : "notify"
+        }
+      ]
+    }
+  }
+}
+

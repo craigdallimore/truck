@@ -1,45 +1,49 @@
-// import ss       from 'socket.io-stream';
-import socketStream from './streams/socket';
-import server       from './server';
+import ss                 from 'socket.io-stream';
+import { flip, prop }     from 'ramda';
+import { spawn }          from 'child_process';
+import path from 'path';
 
-const config = {
-  commands : [
-    {
-      name    : 'Start counter',
-      command : './counter.sh',
-      onEnd   : 'notify'
-      //onRegex : [
-        //{
-          //exp     : /launch/,
-          //command : './peace.sh',
-          //onEnd   : 'notify'
-        //}
-      //]
-    }
-  ]
-};
+import server             from './server';
 
-// When a connection is made, a socket will become available.
-socketStream.onValue(socket => {
+import clientActionStream from './streams/clientAction';
+import socketProp         from './properties/socket';
+import configProp         from './properties/configProp';
 
-  console.log('connected');
+const emitConfig = (config, socket) => socket.emit('config', config);
 
-  socket.emit('config', config);
-  socket.on('action', action => {
+configProp.sampledBy(socketProp, emitConfig).onValue();
 
-    console.log(action);
+const startClickedPredicate = ({ action }) => action === 'START_CLICKED';
 
+const startClickedStream = clientActionStream
+  .filter(startClickedPredicate)
+  .map('.id');
+
+const commandsProp = configProp.map('.commands');
+
+const commandStream = commandsProp.sampledBy(startClickedStream, flip(prop));
+
+socketProp.sampledBy(commandStream, (socket, { command, name }) => {
+
+  const commpath = path.join(__dirname, '..', command);
+  console.log(`Starting command: ${name}, ${commpath}`);
+
+  const counter = spawn(commpath);
+  const stream  = ss.createStream();
+
+  counter.on('error', err => { console.log(err); });
+  counter.on('exit', () => { console.log('exit'); });
+  counter.on('close', () => { console.log('close'); });
+
+  counter.stdout.on('data', d => {
+    console.log('d',d);
   });
 
-  //const spawn   = require('child_process').spawn;
-  //const counter = spawn('./counter.sh'); // so redundant wat
+  ss(socket).emit('p', stream);
 
-  //const stream  = ss.createStream();
-  //ss(socket).emit('p', stream);
+  counter.stdout.pipe(stream);
 
-  //counter.stdout.pipe(stream);
-
-});
+}).onValue();
 
 server.listen(3000);
 

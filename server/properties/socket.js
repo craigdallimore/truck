@@ -6,6 +6,7 @@ const io           = socketIO(server);
 const socketStream = new Bus();
 
 io.on('connection', socket => {
+  console.log('Connected');
   socketStream.push(socket);
 });
 

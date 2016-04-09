@@ -4,8 +4,8 @@
   "description": "A vehicle for running scripts",
   "main": "./server/entry",
   "scripts": {
-    "dev": "watchify client/entry.js -t [ babelify --sourceMapRelative . ] -o static/bundle.js",
-    "server" : "nodemon server/entry --exec babel-node --presets es2015"
+    "dev": "watchify client/entry.js -t [ babelify --sourceMapRelative . ] -o static/bundle.js -v",
+    "server" : "nodemon server/entry --ignore client/ --ignore static/ --exec babel-node --presets es2015"
   },
   "author": "craigdallimore",
   "license": "MIT",

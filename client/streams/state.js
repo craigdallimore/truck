@@ -1,4 +1,5 @@
 import { Bus, update } from 'baconjs';
+import { toPairs }     from 'ramda';
 import ss              from 'socket.io-stream';
 
 import socket       from '../io';
@@ -8,7 +9,10 @@ const dataStream = new Bus();
 
 ss(socket).on('p', stream => {
 
+  console.log('p', stream);
+
   stream.on('data', d => {
+    console.log('d', d);
     dataStream.push(d.toString());
   });
 
@@ -25,11 +29,12 @@ const initialState = {
 };
 
 const onConfig = (state, config) => {
-  state.commands = config.commands;
+  state.commands = toPairs(config.commands);
   return state;
 };
 
 const onNumber = (state, n) => {
+  console.log(n);
   state.number = n;
   return state;
 };

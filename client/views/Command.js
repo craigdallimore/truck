@@ -1,23 +1,19 @@
 import h            from 'virtual-dom/h';
-import { compose }  from 'ramda';
 import actionStream from '../streams/action';
 
 const START_CLICKED = 'START_CLICKED';
 
-const pushToStream = action => {
-  actionStream.push(action);
+const onStartClick = id => () => {
+  actionStream.push({ action : START_CLICKED, id });
 };
 
-const Command = model => {
+const Command = ([id, model]) => {
   return h(
     'li', { className : 'command__item' },
     [
       h('h3', {}, model.name),
       h('button', {
-        'ev-click' : compose(
-          pushToStream,
-          () => { return { action : START_CLICKED, model }; }
-        )
+        'ev-click' : onStartClick(id)
       }, 'Start'),
       h('button', {}, 'Stop')
     ]

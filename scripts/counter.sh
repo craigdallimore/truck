@@ -1,1 +1,1 @@
-node counter.js
+node $(dirname $0)/counter.js

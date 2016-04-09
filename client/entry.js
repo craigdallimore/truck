@@ -1,4 +1,3 @@
-import Delegator    from 'dom-delegator';
 
 import runDOM       from './runDOM';
 import stateStream  from './streams/state';
@@ -10,9 +9,6 @@ const pageStream = stateStream.map(Page);
 const rootNode   = document.querySelector('#root');
 
 runDOM(rootNode, pageStream).onValue();
-
-const delegator = new Delegator();
-delegator.listenTo('click');
 
 actionStream.onValue(action => {
   console.log('action', action);
