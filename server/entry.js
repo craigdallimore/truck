@@ -1,20 +1,10 @@
-'use strict';
-
-const http     = require('http');
-const express  = require('express');
-const socketIO = require('socket.io');
-const ss       = require('socket.io-stream');
-
-const app      = express();
-const server   = http.Server(app);
-const io       = socketIO(server);
-const ONEYEAR  = 31557600000;
-
-app.use(express.static('static', { maxAge : ONEYEAR }));
+// import ss       from 'socket.io-stream';
+import socketStream from './streams/socket';
+import server       from './server';
 
 const config = {
-  commands : {
-    fire : {
+  commands : [
+    {
       name    : 'Start counter',
       command : './counter.sh',
       onEnd   : 'notify'
@@ -26,17 +16,20 @@ const config = {
         //}
       //]
     }
-  }
+  ]
 };
 
-io.on('connection', socket => {
+// When a connection is made, a socket will become available.
+socketStream.onValue(socket => {
+
+  console.log('connected');
 
   socket.emit('config', config);
 
   //const spawn   = require('child_process').spawn;
   //const counter = spawn('./counter.sh'); // so redundant wat
-  //const stream  = ss.createStream();
 
+  //const stream  = ss.createStream();
   //ss(socket).emit('p', stream);
 
   //counter.stdout.pipe(stream);
@@ -46,4 +39,3 @@ io.on('connection', socket => {
 server.listen(3000);
 
 console.info('Truck server running on 3000');
-

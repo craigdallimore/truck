@@ -1,4 +1,4 @@
-import diff from 'virtual-dom/diff';
+import diff  from 'virtual-dom/diff';
 import patch from 'virtual-dom/patch';
 
 // :: DomNode node, EventStream virtualDomStream
