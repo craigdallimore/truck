@@ -1,37 +1,79 @@
 import { update } from 'baconjs';
-import { compose, view, set, flip, lensProp, toPairs } from 'ramda';
+import {
+  append,
+  compose,
+  curry,
+  lensPath,
+  lensProp,
+  map,
+  merge,
+  over,
+  pick,
+  prop,
+  propEq,
+  set,
+  view
+} from 'ramda';
 
 import configStream from './config';
 import processStream from './process';
+import actionStream from './action';
 
-const commandLens  = lensProp('commands');
-//const numberLens   = lensProp('number');
+const actionPredicate = propEq('action');
+const getId = prop('id');
 
-const extractPairs = compose(toPairs, view(commandLens));
+const startActionStream = actionStream
+  .filter(actionPredicate('START_CLICKED'))
+  .map(getId);
+
+const commandLens = lensProp('commands');
 
 const initialState = {
-  number   : 0,
-  commands : []
+  commands : {}
 };
 
-// :: Object config, Object state -> Object state
-const onConfig = (config, state) => set(commandLens, extractPairs(config), state);
+const addProps = merge({
+  lines  : [],
+  status : 'NOT_RUNNING'
+});
 
-// :: Number, Object State -> Object state
-//const onNumber = set(numberLens);
+// :: Object command -> Object model
+const commandToModel = compose(addProps, pick(['name', 'onEnd', 'onRegex']));
 
-// :: Object line, Object state -> Object state
-const onLine = (line, state) => {
+// :: Object config -> Object models
+const configToModels = compose(map(commandToModel), view(commandLens));
 
-  console.log(line);
-  return state;
-
+// :: Object state, Object config -> Object state
+const setCommandModels = (state, config) => {
+  return set(
+    commandLens,
+    configToModels(config),
+    state
+  );
 };
+
+// :: Object state, Object line -> Object state
+const setLine = (state, { id, line }) => {
+  return over(
+    lensPath(['commands', id, 'lines']),
+    append(line),
+    state
+  );
+};
+
+// :: String status, Object state, String id -> Object state
+const setStatus = curry((status, state, id) => {
+  return set(
+    lensPath(['commands', id, 'status']),
+    status,
+    state
+  );
+});
 
 const stateStream = update(initialState,
-  [ configStream ], flip(onConfig),
-  [ processStream ], flip(onLine)
-  //[ processStream ], flip(onNumber)
+  [ startActionStream ], setStatus('RUNNING'),
+  [ configStream ], setCommandModels,
+  [ processStream ], setLine
 );
 
 export default stateStream;

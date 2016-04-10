@@ -12,6 +12,10 @@ const onStopClick = id => () => {
   actionStream.push({ action : STOP_CLICKED, id });
 };
 
+const Line = line => {
+  return h('li', { className : 'command__item__lines__item' }, line);
+};
+
 const Command = ([id, model]) => {
   return h(
     'li', { className : 'command__item' },
@@ -22,10 +26,15 @@ const Command = ([id, model]) => {
       }, 'Start'),
       h('button', {
         'ev-click' : onStopClick(id)
-      }, 'Stop')
+      }, 'Stop'),
+      h('span', { className : 'command__item__status'},
+        model.status
+      ),
+      h('ul', { className : 'command__item__lines' },
+        model.lines.map(Line)
+      )
     ]
   );
 };
 
 export default Command;
-

@@ -3,7 +3,7 @@ import { mergeAll, Bus } from 'baconjs';
 import { compose, map, keys, prop } from 'ramda';
 
 import configStream from './config';
-import socket from '../io';
+import socket       from '../io';
 
 // :: String id -> EventStream
 const idToProcessOutput = id => {
@@ -13,7 +13,7 @@ const idToProcessOutput = id => {
   ss(socket).on(id, stream => {
 
     stream.on('data', d => {
-      dataStream.push(d.toString());
+      dataStream.push({ id, line : d.toString() });
     });
 
     stream.on('end', () => {

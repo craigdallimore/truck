@@ -1,5 +1,6 @@
-import h       from 'virtual-dom/h';
-import Command from './Command';
+import h           from 'virtual-dom/h';
+import Command     from './Command';
+import { toPairs } from 'ramda';
 
 const Page = model => {
   return h(
@@ -7,7 +8,7 @@ const Page = model => {
     [
       h('h2', {}, model.number),
       h('ul', { className : 'command__list' },
-        model.commands.map(Command)
+        toPairs(model.commands).map(Command)
       )
     ]
   );
